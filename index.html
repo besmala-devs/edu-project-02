@@ -446,9 +446,14 @@ function insertText(text, focus) {
 }
 function appendWord(w) {
   const ta = $('ta'); let cur = ta.value.replace(/\s+$/, '');
-  const t = w.trim(), punct = /^[،.؟!]/.test(t), glue = /ـ$/.test(t);
-  if (punct) ta.value = cur + (w.trim().length === 1 ? t : ' ' + t.slice(1).trim() ? t.charAt(0) + ' ' + t.slice(1).trim() : t) + (glue ? '' : ' ');
-  else ta.value = cur + (cur ? ' ' : '') + t + (glue ? '' : ' ');
+  const t = w.trim(), glue = /ـ$/.test(t);
+  if (/^[،.؟!]/.test(t)) {
+    // punctuation attaches to the previous word (no space before, no ".،")
+    const mark = t.charAt(0), rest = t.slice(1).trim();
+    cur = cur.replace(/[.،]+$/, '');
+    if (!cur) return;
+    ta.value = cur + mark + (rest ? ' ' + rest : '') + (glue ? '' : ' ');
+  } else ta.value = cur + (cur ? ' ' : '') + t + (glue ? '' : ' ');
   sound('pop'); onTyped(); ta.focus();
 }
 function starter(text) { const w = text.trim().split(/\s+/); return w.length > 4 ? w.slice(0, 3).join(' ') : w.slice(0, 2).join(' '); }
